@@ -1,0 +1,8 @@
+{
+  "REQUIRED_VARIABLES": {
+    "common": []
+  },
+  "settings": {
+    "IMR_LOG_LEVEL": "INFO"
+  }
+}

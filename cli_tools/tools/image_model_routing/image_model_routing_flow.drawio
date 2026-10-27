@@ -1,0 +1,177 @@
+<mxfile host="app.diagrams.net" modified="2026-10-21T00:00:00.000Z" agent="claude-code" version="24.0.0" type="device">
+  <diagram id="image-model-routing-flow" name="image_model_routing - Input/Output Flow">
+    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===================== INPUT SWIMLANE ===================== -->
+        <mxCell id="lane_input" value="INPUT" style="swimlane;rounded=0;whiteSpace=wrap;html=1;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="300" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in_cli" value="CLI invocation&#10;python image_model_routing.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="lane_input">
+          <mxGeometry x="20" y="40" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in_file" value="--input-file (required)&#10;Path to image file&#10;.png .jpg .jpeg .gif .webp .bmp .tiff .tif" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_input">
+          <mxGeometry x="20" y="120" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in_profile" value="--profile (optional)&#10;balanced | quality_first | cost_first | latency_first&#10;default: balanced" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_input">
+          <mxGeometry x="20" y="200" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in_floor" value="--quality-floor (optional)&#10;float 0-1, minimum quality prior&#10;default: 0.0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_input">
+          <mxGeometry x="20" y="280" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in_output" value="--output (optional)&#10;file path to write JSON&#10;default: stdout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_input">
+          <mxGeometry x="20" y="360" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="in_bytes" value="Raw image bytes&#10;(read from --input-file,&#10;never decoded/resized)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="lane_input">
+          <mxGeometry x="20" y="460" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== PROCESSING SWIMLANE ===================== -->
+        <mxCell id="lane_proc" value="PROCESSING (image_model_routing.py -&gt; common.py / model_cards.py / router.py)" style="swimlane;rounded=0;whiteSpace=wrap;html=1;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="440" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_validate" value="1. Validate&#10;File exists? Extension supported?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="50" width="360" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_tokens" value="2. common.py: estimate_image_tokens()&#10;Sniff PNG/JPEG header for (width, height)&#10;tiles = (w*h) / 512^2&#10;tokens = 85 + tiles * 170&#10;(unknown format -&gt; default 512 tokens)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="130" width="360" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_registry" value="3. model_cards.py: all_cards()&#10;Static registry of ModelCards&#10;{model_id, provider, supports_vision,&#10;quality, cost_per_1k_tokens, latency_ms, reliability}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="240" width="360" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_filter" value="4. router.py: _hard_filter()&#10;Drop any card where supports_vision=false&#10;Drop any card where quality &lt; quality_floor&#10;-&gt; eligible[] + filtered_out[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="350" width="360" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_noeligible" value="eligible == empty?&#10;raise NoEligibleModelError" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="lane_proc">
+          <mxGeometry x="100" y="450" width="240" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_normalize" value="5. router.py: _normalize()&#10;Min-max scale quality / cost / latency / reliability&#10;across eligible candidates&#10;(cost and latency inverted - lower is better)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="550" width="360" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_score" value="6. router.py: _score()&#10;weighted dot product using the active&#10;profile's weight vector&#10;score = sum(w[o] * normalized[o][model] for o in objectives)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="660" width="360" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_select" value="7. Select&#10;Sort eligible candidates by score desc&#10;chosen = top-ranked candidate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="770" width="360" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_assemble" value="8. Assemble result dict&#10;input_file + image_dimensions +&#10;estimated_input_tokens + routing_decision" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_proc">
+          <mxGeometry x="40" y="860" width="360" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== OUTPUT SWIMLANE ===================== -->
+        <mxCell id="lane_output" value="OUTPUT" style="swimlane;rounded=0;whiteSpace=wrap;html=1;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="880" y="40" width="440" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_success_label" value="SUCCESS -&gt; stdout (or --output file), exit code 0" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="40" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_success" value="{&#10;  &quot;success&quot;: true,&#10;  &quot;result&quot;: {&#10;    &quot;input_file&quot;: &quot;&lt;resolved path&gt;&quot;,&#10;    &quot;image_dimensions&quot;: {&quot;width&quot;: N, &quot;height&quot;: N} | null,&#10;    &quot;estimated_input_tokens&quot;: N,&#10;    &quot;routing_decision&quot;: {&#10;      &quot;strategy&quot;: &quot;score&quot;,&#10;      &quot;profile&quot;: &quot;balanced&quot;,&#10;      &quot;profile_weights&quot;: {quality, cost, latency, reliability},&#10;      &quot;quality_floor&quot;: 0.0,&#10;      &quot;total_models&quot;: N,&#10;      &quot;eligible_count&quot;: N,&#10;      &quot;filtered_out&quot;: [{model_id, reason, category}],&#10;      &quot;eligible_ranked&quot;: [{model_id, provider, score, objectives,&#10;                           predicted_quality, predicted_cost_per_1k_tokens_usd,&#10;                           predicted_latency_ms, predicted_reliability}],&#10;      &quot;chosen&quot;: {model_id, provider, score, ...}&#10;    }&#10;  },&#10;  &quot;message&quot;: &quot;Routing complete&quot;&#10;}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fontFamily=Courier New;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="70" width="400" height="330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_fail_label" value="FAILURE -&gt; stderr, exit code 1" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="430" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_fail1" value="File not found:&#10;{ &quot;success&quot;: false,&#10;  &quot;error&quot;: &quot;Input file not found: &lt;path&gt;&quot; }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;fontFamily=Courier New;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="460" width="400" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_fail2" value="Unsupported extension:&#10;{ &quot;success&quot;: false,&#10;  &quot;error&quot;: &quot;Unsupported image format: .ext. Supported: ...&quot; }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;fontFamily=Courier New;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="520" width="400" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_fail3" value="No eligible model (e.g. quality_floor too high):&#10;{ &quot;success&quot;: false,&#10;  &quot;error&quot;: &quot;No eligible vision-capable model found (...)&quot;,&#10;  &quot;error_code&quot;: &quot;NO_ELIGIBLE_MODEL&quot; }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;fontFamily=Courier New;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="580" width="400" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_fail4" value="Any other exception:&#10;{ &quot;success&quot;: false, &quot;error&quot;: &quot;&lt;message&gt;&quot; }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;fontFamily=Courier New;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="650" width="400" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="out_consumer" value="Consumed by downstream tool&#10;(e.g. entity_extraction, document_domain_classification)&#10;using routing_decision.chosen.model_id" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="lane_output">
+          <mxGeometry x="20" y="860" width="400" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== EDGES ===================== -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="in_cli" target="p_validate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="in_file" target="p_validate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="in_bytes" target="p_tokens">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_validate" target="p_tokens">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_tokens" target="p_registry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_registry" target="p_filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="--quality-floor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="in_floor" target="p_filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_filter" target="p_noeligible">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="p_noeligible" target="out_fail3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="lane_proc" source="p_noeligible" target="p_normalize">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="--profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="in_profile" target="p_score">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_normalize" target="p_score">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_score" target="p_select">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="lane_proc" source="p_select" target="p_assemble">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="p_assemble" target="out_success">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;" edge="1" parent="1" source="p_validate" target="out_fail1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;" edge="1" parent="1" source="p_validate" target="out_fail2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="out_success" target="out_consumer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" value="--output" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;dashed=1;" edge="1" parent="1" source="in_output" target="out_success">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
