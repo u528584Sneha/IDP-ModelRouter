@@ -415,6 +415,49 @@ def _score(model_id: str, normalized: Dict[str, Dict[str, float]], weights: Dict
     return total
 
 
+def _build_reasoning(
+    candidates_scored: List[dict],
+    weights: Dict[str, float],
+    profile_name: str,
+) -> str:
+    """Synthesize a human-readable rationale for the top-ranked model in
+    candidates_scored, from the scoring data already computed (no LLM call --
+    the routing decision is deterministic math, so the explanation is too)."""
+    chosen = candidates_scored[0]
+    weights_desc = " / ".join(f"{o} {weights[o]:.2f}" for o in OBJECTIVES)
+    dominant_obj = max(OBJECTIVES, key=lambda o: weights[o] * chosen["objectives"][o])
+
+    base = (
+        f"Selected {chosen['model_id']} (score {chosen['score']:.4f}) under the "
+        f"'{profile_name}' profile ({weights_desc} weighting), driven mainly by its "
+        f"{dominant_obj} score ({chosen['objectives'][dominant_obj]:.2f} normalized)."
+    )
+
+    if len(candidates_scored) < 2:
+        return base + " It was the only eligible model after the hard filter."
+
+    runner_up = candidates_scored[1]
+    margin = chosen["score"] - runner_up["score"]
+    comparison = (
+        f" Beat runner-up {runner_up['model_id']} (score {runner_up['score']:.4f}) "
+        f"by +{margin:.4f}"
+    )
+
+    tradeoff_obj = min(
+        OBJECTIVES,
+        key=lambda o: chosen["objectives"][o] - runner_up["objectives"][o],
+    )
+    if chosen["objectives"][tradeoff_obj] < runner_up["objectives"][tradeoff_obj]:
+        comparison += (
+            f", despite trailing on {tradeoff_obj} "
+            f"({chosen['objectives'][tradeoff_obj]:.2f} vs. {runner_up['objectives'][tradeoff_obj]:.2f})."
+        )
+    else:
+        comparison += "."
+
+    return base + comparison
+
+
 def _select_top_models(candidates_scored: List[dict], n: int = 3) -> dict:
     """Pick the top-n ranked models, applying a provider-diversity rule to
     the 3rd pick: if rank-1 and rank-2 share a provider, rank-3 must come
@@ -572,6 +615,9 @@ def route(
     _debug(f"\n[10] SELECTION:")
     _debug(f"  ✓ CHOSEN: {chosen['model_id']} (score={chosen['score']:.4f})")
 
+    reasoning = _build_reasoning(candidates_scored, weights, profile_name)
+    _debug(f"  REASONING: {reasoning}")
+
     top_models = _select_top_models(candidates_scored, n=3)
 
     return {
@@ -589,5 +635,6 @@ def route(
         "filtered_out": filter_result["filtered_out"],
         "eligible_ranked": candidates_scored,
         "chosen": chosen,
+        "reasoning": reasoning,
         "top_models": top_models,
     }

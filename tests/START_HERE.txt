@@ -1,0 +1,202 @@
+================================================================================
+                         🎯 START HERE 🎯
+================================================================================
+
+Your Question: "Where will the output be stored for the test scenarios?"
+
+QUICK ANSWER:
+═════════════
+
+Test outputs are stored in TWO places:
+
+  1. test_cases.xlsx
+     └─ You manually update the Status column
+     └─ Tracks: Pending → Pass/Fail
+
+  2. output/ folder
+     ├─ output/reports/test_report.html      ← View in browser
+     ├─ output/coverage/html/index.html      ← View in browser
+     ├─ output/logs/test_execution.log       ← View in terminal
+     └─ output/reports/junit.xml             ← For CI/CD
+
+
+HOW TO GET STARTED:
+═══════════════════
+
+Step 1: Review Test Cases
+  └─ Open: tests/test_cases.xlsx
+  └─ See: 58 comprehensive test cases
+
+Step 2: Run Tests
+  └─ Command: cd tests && pytest test_router_sample.py -v
+
+Step 3: View Results
+  └─ Test Report: start output\reports\test_report.html
+  └─ Coverage:    start output\coverage\html\index.html
+  └─ Logs:        cat output\logs\test_execution.log
+
+Step 4: Update Manual Tracking (Optional)
+  └─ Open: test_cases.xlsx
+  └─ Update: Status column (Pending → Pass/Fail)
+  └─ Save: File
+
+
+WHAT'S INCLUDED:
+════════════════
+
+Documentation:
+  ✓ INDEX.md                  - Navigation guide (START HERE)
+  ✓ ANSWER_TO_YOUR_QUESTION.md - Detailed answer
+  ✓ QUICK_START.md            - 5 minute overview
+  ✓ README.md                 - Complete guide
+  ✓ OUTPUT_STRUCTURE.md       - Storage explained
+  ✓ TEST_SUMMARY.md           - Coverage details
+
+Test Materials:
+  ✓ test_cases.xlsx           - 58 test cases (6 sheets)
+  ✓ test_router_sample.py     - Sample test implementation
+  ✓ generate_test_cases.py    - Excel file generator
+
+Configuration:
+  ✓ pytest.ini                - Pytest configuration
+  ✓ .gitignore                - Git ignore rules
+
+Output:
+  ✓ output/                   - (Created when tests run)
+
+
+STORAGE SUMMARY:
+════════════════
+
+Manual Tracking:
+  File: test_cases.xlsx
+  Location: tests/test_cases.xlsx
+  You: Update Status column
+  Format: Excel
+
+Automated Results (Pytest):
+  Folder: output/
+  Location: tests/output/
+  Created: When tests run
+
+  ├─ reports/test_report.html       HTML test results
+  ├─ coverage/html/index.html       HTML coverage report
+  ├─ reports/junit.xml              XML for CI/CD
+  ├─ coverage/coverage.xml          XML for SonarQube
+  └─ logs/test_execution.log        Execution log
+
+
+NEXT STEPS:
+═══════════
+
+1. Open INDEX.md for full navigation
+2. Open ANSWER_TO_YOUR_QUESTION.md for detailed explanation
+3. Open QUICK_START.md for quick commands
+4. Open test_cases.xlsx to see all test cases
+5. Run: pytest test_router_sample.py -v
+
+
+QUICK REFERENCE:
+════════════════
+
+Question                            Answer
+─────────────────────────────────────────────────────────────
+Where test status tracked?          test_cases.xlsx (you update)
+Where pytest results stored?         output/ folder (auto-generated)
+How to view test results?           output/reports/test_report.html
+How to check coverage?              output/coverage/html/index.html
+Where are logs?                     output/logs/test_execution.log
+For CI/CD integration?              output/reports/junit.xml
+
+
+DOCUMENTATION GUIDE:
+════════════════════
+
+If you want...              Read...
+──────────────────────────────────────────────────────
+Quick overview              QUICK_START.md
+Complete answer             ANSWER_TO_YOUR_QUESTION.md
+Full navigation             INDEX.md
+Detailed storage guide      OUTPUT_STRUCTURE.md
+Test summary               TEST_SUMMARY.md
+File structure             DIRECTORY_TREE.txt
+
+
+FILES CREATED:
+═══════════════
+
+Documentation:
+  INDEX.md                        Navigation guide
+  ANSWER_TO_YOUR_QUESTION.md      Detailed answer
+  QUICK_START.md                  5 minute overview
+  README.md                       Complete test guide
+  OUTPUT_STRUCTURE.md             Storage locations
+  TEST_SUMMARY.md                 Coverage summary
+  DIRECTORY_TREE.txt              File structure
+  START_HERE.txt                  This file
+
+Test Materials:
+  test_cases.xlsx                 58 test cases
+  test_router_sample.py           Sample tests
+  generate_test_cases.py          Excel generator
+
+Configuration:
+  pytest.ini                      Pytest config
+  .gitignore                      Git ignore
+
+Output (Created by pytest):
+  output/reports/test_report.html
+  output/coverage/html/index.html
+  output/logs/test_execution.log
+  output/reports/junit.xml
+  output/coverage/coverage.xml
+
+
+KEY TAKEAWAYS:
+═══════════════
+
+✓ Test documentation in Excel (test_cases.xlsx)
+✓ Test code in Python (test_router_sample.py)
+✓ Manual tracking: You update Status column
+✓ Automated results: Pytest creates output/ folder
+✓ HTML reports: Open in browser
+✓ CI/CD ready: XML formats included
+✓ Everything documented: Multiple guides included
+
+
+COMMANDS CHEAT SHEET:
+══════════════════════
+
+# Run tests
+cd tests
+pytest test_router_sample.py -v
+
+# View test results
+start output\reports\test_report.html
+
+# View coverage
+start output\coverage\html\index.html
+
+# View logs
+cat output\logs\test_execution.log
+
+# Open test cases
+start test_cases.xlsx
+
+
+YOU'RE ALL SET! 🎉
+══════════════════
+
+Everything is configured and ready to use:
+  1. Test cases are defined
+  2. Sample implementation provided
+  3. Output structure configured
+  4. Comprehensive documentation included
+  5. Ready to run pytest
+
+Start by opening: INDEX.md or QUICK_START.md
+
+================================================================================
+Created: October 28, 2026
+Status: Complete and Ready for Use ✓
+================================================================================

@@ -1,0 +1,25 @@
+# Test output directories
+output/
+*.log
+
+# Pytest cache
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# Test artifacts
+*.tmp
+*.temp
+test_results/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
